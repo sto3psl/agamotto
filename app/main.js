@@ -1,4 +1,5 @@
-import { h, render } from 'preact'
+import React from 'react'
+import { render } from 'react-dom'
 import App from './App'
 import PouchDB from 'pouchdb'
 
@@ -8,7 +9,7 @@ const db = new PouchDB('times')
 
 async function boot() {
   const info = await db.info()
-  render(<App store={db}>{info.db_name}</App>, root, root.lastChild)
+  render(<App store={db}>{info.db_name}</App>, root)
 }
 
 boot()
