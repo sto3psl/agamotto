@@ -1,5 +1,18 @@
 import React, { Component } from 'react'
 
+const DateFormat = new Intl.DateTimeFormat(navigator.language, {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric'
+})
+
+const TimeFormat = new Intl.DateTimeFormat(navigator.language, {
+  hour: 'numeric',
+  minute: 'numeric',
+  second: 'numeric'
+})
+
 export default class App extends Component {
   constructor() {
     super()
@@ -11,44 +24,79 @@ export default class App extends Component {
     this.addEntry = this.addEntry.bind(this)
   }
 
-  async loadDocs() {
-    const items = await this.props.store.allDocs({
-      include_docs: true,
-      descending: true
-    })
-
-    this.setState(() => ({
-      items: items.rows
-    }))
-    console.log(items)
-  }
-
   async componentDidMount() {
-    this.loadDocs()
+    const { store } = this.props
+
+    store
+      .changes({
+        since: 'now',
+        live: true,
+        include_docs: true
+      })
+      .on('change', change => {
+        const index = this.state.items.findIndex(item => item._id === change.id)
+        console.log(change, index)
+        this.setState(prevState => {
+          if (change.deleted) {
+            prevState.items.splice(index, 1)
+            return prevState
+          }
+
+          if (index >= 0) {
+            prevState.items[index] = change.doc
+          } else {
+            const items = [change.doc].concat(prevState.items)
+            console.log(items)
+            prevState.items = items
+          }
+          return prevState
+        })
+      })
+
+    const { rows } = await store.allDocs({ include_docs: true, descending: true })
+    this.setState(() => ({
+      items: rows.map(row => row.doc)
+    }))
+    console.log(rows.map(row => row.doc))
   }
 
-  async addEntry() {
-    const time = new Date()
-    const res = await this.props.store.put({
-      _id: time,
-      name: `Entry ${time.toISOString()}`,
-      date: time
+  addEntry() {
+    const now = new Date()
+    this.props.store.put({
+      _id: `id-${+now}`,
+      startDate: now,
+      stopDate: null
     })
-    this.loadDocs()
-    console.log(res)
   }
 
-  render({ store, children }) {
+  modifyEntry(id) {
+    return async () => {
+      const { store } = this.props
+      const doc = await store.get(id)
+
+      this.props.store.put({
+        ...doc,
+        _deleted: true
+      })
+    }
+  }
+
+  render() {
+    const { store, children } = this.props
     return (
       <div>
-        <button onClick={this.addEntry}>Add entry</button>
+        <button onClick={this.addEntry}>New Entry</button>
         <ul>
-          {this.state.items.map(item => (
-            <li>
-              {new Date(item.doc.date).toLocaleDateString()}-
-              {new Date(item.doc.date).toLocaleTimeString()}
-            </li>
-          ))}
+          {this.state.items.map((item, i) => {
+            const startDate = new Date(item.startDate)
+            return (
+              <li key={`${i}-${item._id}`}>
+                  <div>{TimeFormat.format(startDate)} Uhr</div>
+                  <div>{DateFormat.format(startDate)}</div>
+                  <button onClick={this.modifyEntry(item._id)}>Löschen</button>
+              </li>
+            )
+          })}
         </ul>
       </div>
     )
