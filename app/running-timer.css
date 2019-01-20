@@ -1,0 +1,31 @@
+.container {
+  background: var(--backgroundColor);
+
+  --timePadding: 30px;
+}
+
+.time {
+  font-weight: 700;
+  font-size: 48px;
+  text-align: center;
+  padding: var(--timePadding) 0 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.start {
+  text-align: center;
+  font-size: 14px;
+  padding-bottom: var(--timePadding);
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 4px;
+}
+
+.button {
+  padding: 16px;
+  background-color: #0002;
+  border: none;
+}

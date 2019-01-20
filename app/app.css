@@ -1,0 +1,23 @@
+@import 'sanitize.css';
+
+/*
+  #020E17
+  #0E5159
+  #09736A
+  #15AB89
+  #76D9B9
+ */
+
+body {
+  --backgroundRGB: 66, 33, 99;
+  --backgroundColor: rgb(var(--backgroundRGB));
+  background: var(--backgroundColor);
+  color: white;
+}
+
+button {
+  color: inherit;
+  font-variant: small-caps;
+  text-transform: lowercase;
+  padding: 0;
+}

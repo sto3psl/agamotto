@@ -1,7 +1,16 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
+import distanceInWordsToNow from 'date-fns/distance_in_words_to_now'
+import distanceInWords from 'date-fns/distance_in_words'
+import distanceInWordsStrict from 'date-fns/distance_in_words_strict'
+import differenceInSeconds from 'date-fns/difference_in_seconds'
+import { formatTimeDifference } from './utils/time'
+
+import RunningTimer from './RunningTimer'
+import styles from './layout.css'
+import StartButton from './StartButton'
+import ListItem from './ListItem'
 
 const DateFormat = new Intl.DateTimeFormat(navigator.language, {
-  weekday: 'long',
   day: 'numeric',
   month: 'long',
   year: 'numeric'
@@ -18,7 +27,7 @@ export default class App extends Component {
     super()
 
     this.state = {
-      items: []
+      timerList: []
     }
 
     this.addEntry = this.addEntry.bind(this)
@@ -34,20 +43,19 @@ export default class App extends Component {
         include_docs: true
       })
       .on('change', change => {
-        const index = this.state.items.findIndex(item => item._id === change.id)
+        const index = this.state.timerList.findIndex(item => item._id === change.id)
         console.log(change, index)
         this.setState(prevState => {
           if (change.deleted) {
-            prevState.items.splice(index, 1)
+            prevState.timerList.splice(index, 1)
             return prevState
           }
 
           if (index >= 0) {
-            prevState.items[index] = change.doc
+            prevState.timerList[index] = change.doc
           } else {
-            const items = [change.doc].concat(prevState.items)
-            console.log(items)
-            prevState.items = items
+            const timerList = [change.doc].concat(prevState.timerList)
+            prevState.timerList = timerList
           }
           return prevState
         })
@@ -55,9 +63,8 @@ export default class App extends Component {
 
     const { rows } = await store.allDocs({ include_docs: true, descending: true })
     this.setState(() => ({
-      items: rows.map(row => row.doc)
+      timerList: rows.map(row => row.doc)
     }))
-    console.log(rows.map(row => row.doc))
   }
 
   addEntry() {
@@ -69,7 +76,7 @@ export default class App extends Component {
     })
   }
 
-  modifyEntry(id) {
+  deleteEntry(id) {
     return async () => {
       const { store } = this.props
       const doc = await store.get(id)
@@ -81,23 +88,54 @@ export default class App extends Component {
     }
   }
 
+  modifyEntry(id) {
+    return async () => {
+      const { store } = this.props
+      const doc = await store.get(id)
+
+      this.props.store.put({
+        ...doc,
+        stopDate: new Date()
+      })
+    }
+  }
+
   render() {
     const { store, children } = this.props
+    let { timerList } = this.state
+
+    console.log(timerList)
+    const timerIsRunning = !!timerList.length && !timerList[0].stopDate
+    let runningTimer = timerIsRunning ? timerList[0] : null
+    console.log(runningTimer, timerList)
+
+    const list = timerIsRunning ? timerList.slice(1) : timerList
+
     return (
-      <div>
-        <button onClick={this.addEntry}>New Entry</button>
-        <ul>
-          {this.state.items.map((item, i) => {
-            const startDate = new Date(item.startDate)
-            return (
-              <li key={`${i}-${item._id}`}>
-                  <div>{TimeFormat.format(startDate)} Uhr</div>
-                  <div>{DateFormat.format(startDate)}</div>
-                  <button onClick={this.modifyEntry(item._id)}>Löschen</button>
-              </li>
-            )
-          })}
-        </ul>
+      <div className={styles.grid}>
+        <div className={styles.main}>
+          {runningTimer ? (
+            <RunningTimer
+              TimeFormat={TimeFormat}
+              startDate={runningTimer.startDate}
+              onCancel={this.deleteEntry(runningTimer._id)}
+              onStop={this.modifyEntry(runningTimer._id)}
+            />
+          ) : (
+            <StartButton onClick={this.addEntry}>New Entry</StartButton>
+          )}
+        </div>
+        <div className={styles.list}>
+          {list.map((item, i) => (
+            <ListItem
+              key={`${i}-${item._id}`}
+              {...item}
+              DateFormat={DateFormat}
+              TimeFormat={TimeFormat}
+              onDelete={this.deleteEntry(item._id)}
+            />
+          ))}
+        </div>
       </div>
     )
   }

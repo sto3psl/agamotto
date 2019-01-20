@@ -2,7 +2,7 @@
   "short_name": "Agamotto",
   "name": "Agamotto - Time Tracker",
   "start_url": "/?source=pwa",
-  "background_color": "#663366",
+  "background_color": "#663399",
   "display": "standalone",
-  "theme_color": "#663366"
+  "theme_color": "#663399"
 }

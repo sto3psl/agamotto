@@ -1,0 +1,37 @@
+.container {
+  margin: 4px 0;
+  background-color: #0002;
+  padding: 8px;
+}
+
+.duration {
+  display: flex;
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 1.4;
+  align-items: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.date {
+  opacity: 0.33;
+  padding: 4px 0;
+}
+
+.delete {
+  font-size: 14px;
+  width: 25px;
+  height: 25px;
+  padding-right: 1px;
+  margin-left: 16px;
+  background: #0003;
+  border: none;
+}
+
+
+@supports (padding: max(0px)) {
+  .container {
+    padding-right: max(8px, env(safe-area-inset-right));
+    padding-left: max(8px, env(safe-area-inset-left));
+  }
+}
