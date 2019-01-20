@@ -44,7 +44,7 @@ export default class App extends Component {
       })
       .on('change', change => {
         const index = this.state.timerList.findIndex(item => item._id === change.id)
-        console.log(change, index)
+
         this.setState(prevState => {
           if (change.deleted) {
             prevState.timerList.splice(index, 1)
@@ -104,10 +104,8 @@ export default class App extends Component {
     const { store, children } = this.props
     let { timerList } = this.state
 
-    console.log(timerList)
     const timerIsRunning = !!timerList.length && !timerList[0].stopDate
     let runningTimer = timerIsRunning ? timerList[0] : null
-    console.log(runningTimer, timerList)
 
     const list = timerIsRunning ? timerList.slice(1) : timerList
 
