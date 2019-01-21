@@ -1,8 +1,9 @@
 {
   "scripts": {
+    "now-build": "npm run build",
     "format": "prettier app/**/*.js --write",
     "watch": "parcel watch app/index.html",
-    "build": "ENV=production parcel build app/index.html && workbox copyLibraries dist && workbox generateSW",
+    "build": "parcel build app/index.html && workbox copyLibraries dist && workbox generateSW",
     "serve": "serve dist",
     "start": "concurrently \"npm:watch\" \"npm:serve\"",
     "test": "echo \"Error: no test specified\" && exit 1",
