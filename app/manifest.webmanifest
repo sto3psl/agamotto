@@ -4,5 +4,17 @@
   "start_url": "/?source=pwa",
   "background_color": "#663399",
   "display": "standalone",
-  "theme_color": "#663399"
+  "theme_color": "#663399",
+  "icons": [
+    {
+      "src": "/icons/icon_60pt@3x.png",
+      "type": "image/png",
+      "sizes": "180x180"
+    },
+    {
+      "src": "/icons/Icon.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
 }
